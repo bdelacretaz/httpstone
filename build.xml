@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!--
+    ant build.xml file for the httpstone project
+    $Id$
+-->
+
+<project name="httpstone" default="explain" basedir=".">
+
+    <!-- read CVS-stored and local properties files -->
+    <property file="local-user.properties"/>
+    <property file="user.properties"/>
+
+    <!-- set global properties for this build -->
+    <property name="src" value="src"/>
+
+    <property name="build" value="build"/>
+    <property name="build.classes" value="build/classes"/>
+    <property name="build.javadoc" value="build/javadoc"/>
+
+    <property name="dist" value="dist"/>
+    <property name="dist.lib" value="dist/lib"/>
+    <property name="dist.jar" value="${dist.lib}/${ant.project.name}.jar"/>
+
+    <!-- classpath used to compile -->
+    <path id="compile.classpath">
+        <fileset dir="lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- classpath used to run tests -->
+    <path id="test.classpath">
+        <path refid="compile.classpath"/>
+        <fileset dir="${dist}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="init">
+        <tstamp/>
+    </target>
+
+    <target name="explain" depends="init">
+        <echo>
+To run this test code, use
+    ant -projecthelp
+to see the list of build targets.
+
+In the -projecthelp display, build targets used for testing have numbers like [T1] to indicate
+the order in which the targets are meant to be run.
+
+See the user.properties file for local configuration values that might need to be
+set for your environment.
+    </echo>
+    </target>
+
+    <target name="compile" depends="init" description="compile all java classes">
+        <mkdir dir="${build.classes}"/>
+        <javac srcdir="${src}" destdir="${build.classes}">
+            <classpath refid="compile.classpath"/>
+        </javac>
+    </target>
+
+    <target name="dist" depends="init,compile" description="build jar for distribution">
+        <mkdir dir="${dist.lib}"/>
+        <jar jarfile="${dist.jar}" basedir="${build.classes}"/>
+    </target>
+
+    <target name="run" depends="init,dist" description="[T1] run the HttpStone graphical interface">
+        <java
+            classname="ch.codeconsult.httpstone.HttpStone"
+            classpathref="test.classpath"
+            fork="yes"
+        >
+            <arg value="${config.file}"/>
+        </java>
+    </target>
+
+    <target name="clean" depends="init" description="delete files created by the compile and dist targets">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="javadoc" depends="dist" description="create the java API docs">
+        <mkdir dir="${build.javadoc}"/>
+        <javadoc packagenames="com.*"
+            sourcepath="${src}"
+            destdir="${build.javadoc}"
+            classpathref="test.classpath"
+            author="true"
+            version="true"
+            use="false"
+            noindex="true"
+            windowtitle="${ant.project.name} API"
+            doctitle="${ant.project.name} API"
+            package="true"
+            />
+        <echo>The javadoc should now be available in ${build.javadoc}</echo>
+    </target>
+
+</project>
