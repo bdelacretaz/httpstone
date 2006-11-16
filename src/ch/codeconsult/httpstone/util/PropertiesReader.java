@@ -26,6 +26,10 @@ public class PropertiesReader {
         props = p;
     }
 
+    public boolean hasProperty(String key) {
+      return props.containsKey(key);
+    }
+    
     public String getRequiredString(String key) throws MissingPropertyException {
         final String result = props.getProperty(key);
         if(result==null) throw new MissingPropertyException(key);

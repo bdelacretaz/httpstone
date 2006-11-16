@@ -68,11 +68,15 @@ set for your environment.
     </target>
 
     <target name="run" depends="init,dist" description="[T1] run the HttpStone graphical interface">
+    	  <propertyset id="sysprop">
+    	  	<propertyref builtin="system"/>
+    	  </propertyset>
         <java
             classname="ch.codeconsult.httpstone.HttpStone"
             classpathref="test.classpath"
             fork="yes"
         >
+        	  <jvmarg value="-DRandomChoiceUrlGenerator.file=${RandomChoiceUrlGenerator.file}"/>
             <arg value="${config.file}"/>
         </java>
     </target>

@@ -1,6 +1,8 @@
 package ch.codeconsult.httpstone.http;
 
 import ch.codeconsult.httpstone.infrastructure.Worker;
+import ch.codeconsult.httpstone.url.ConstantUrlGenerator;
+import ch.codeconsult.httpstone.url.UrlGenerator;
 import ch.codeconsult.httpstone.util.PropertiesReader;
 import ch.codeconsult.httpstone.util.TimeStats;
 import ch.codeconsult.httpstone.reports.PageErrorReport;
@@ -24,7 +26,7 @@ import java.util.Map;
  */
 public class HttpPageRetrieverWorker extends Worker {
     private static final String NONE="NONE";
-    private URL url;
+    private UrlGenerator urlGenerator;
     private long maxRetrievalTime;
     private final TimeStats stats = new TimeStats();
     private URL currentUrl;
@@ -38,13 +40,20 @@ public class HttpPageRetrieverWorker extends Worker {
     /** configure this worker */
     public void configure(PropertiesReader p, String prefix) throws Exception {
         super.configure(p, prefix);
-        url = new URL(p.getRequiredString(prefix + "url"));
         infoText = p.getRequiredString(prefix + "info");
         maxRetrievalTime = p.getRequiredInt(prefix + "max.retrieval.msec");
         randomUrlSuffix = p.getRequiredString(prefix + "random.url.suffix");
         reportsDir = new File(p.getRequiredString("error.reports.directory"));
 
         infoText+= " (max " + maxRetrievalTime + " msec)";
+        
+        final String urlClassProp = prefix + "urlGenerator.class";
+        if(p.hasProperty(urlClassProp)) {
+          final String clazz = p.getRequiredString(urlClassProp);
+          urlGenerator = (UrlGenerator)(Class.forName(clazz)).newInstance();
+        } else {
+          urlGenerator = new ConstantUrlGenerator(new URL(p.getRequiredString(prefix + "url")));
+        }
     }
 
     /** implement to do one iteration of our work */
@@ -108,7 +117,7 @@ public class HttpPageRetrieverWorker extends Worker {
             suffix = randomUrlSuffix + Math.random();
         }
 
-        currentUrl = new URL(url + suffix);
+        currentUrl = new URL(urlGenerator.getUrl() + suffix);
         lastRetrievedContent = "NO CONTENT FOR URL " + currentUrl;
         actionText = "Retrieving URL...";
         statusChanged();

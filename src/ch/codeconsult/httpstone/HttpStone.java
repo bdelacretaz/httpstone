@@ -15,7 +15,7 @@ import java.util.Iterator;
  */
 
 public class HttpStone {
-    private static final String VERSION = "0.4";
+    private static final String VERSION = "0.5";
 
     public static String getVersion() {
         return VERSION;
