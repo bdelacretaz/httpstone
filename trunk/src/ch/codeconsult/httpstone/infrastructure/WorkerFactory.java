@@ -25,7 +25,14 @@ public class WorkerFactory {
         for(int i=0; i <= MAX_WORKERS; i++) {
             final String className=config.getProperty(PROP_PREFIX + i + ".class");
             if(className!=null) {
-                configureWorker(new PropertiesReader(config),i,className);
+                int instances = 1;
+                final String str = config.getProperty(PROP_PREFIX + i + ".instances");
+                if(str!=null) {
+                  instances = Integer.valueOf(str).intValue();
+                }
+                for(int j=0; j < instances; j++) {
+                  configureWorker(new PropertiesReader(config),i,className);
+                }
             }
         }
     }
